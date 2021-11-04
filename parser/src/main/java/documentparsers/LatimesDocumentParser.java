@@ -1,58 +1,48 @@
 package documentparsers;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.search.similarities.BM25Similarity;
-import org.apache.lucene.search.similarities.Similarity;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.IndexWriter;
+
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 
+import org.apache.lucene.document.Document;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class LatimesDocumentParser {
-  String FILE_PATH = "data/data/latimes/";
-  private final Analyzer analyzer;
-  private final Similarity similarity;
+  String DIR_PATH = "data/data/latimes/";
+  IndexWriter iwriter;
 
-  public LatimesDocumentParser(Analyzer analyzer, Similarity similarity){
-    this.analyzer = analyzer;
-    this.similarity = similarity;
+  public LatimesDocumentParser(IndexWriter indexWriter){
+    this.iwriter = indexWriter;
   }
 
   public void parseDocument() throws IOException {
-    File directoryPath = new File(FILE_PATH);
+    File directoryPath = new File(DIR_PATH);
     List<File> filesList = Arrays.stream(Objects.requireNonNull(directoryPath.listFiles())).filter(file -> !file.toString().toLowerCase(Locale.ROOT).endsWith(".txt")).collect(Collectors.toList());
 
-    System.out.println(this.analyzer);
-    System.out.println(this.similarity);
     for( File file: filesList){
-      Document fileToParse = Jsoup.parse(file, "UTF-8");
-      List<Element> documents =  fileToParse.select("doc");
+      org.jsoup.nodes.Document fileToParse = Jsoup.parse(file, "UTF-8");
+      List<Element> documentsInFile =  fileToParse.select("doc");
 
-      for(Element element: documents){
-        List<Node> elements =  element.childNodes().stream().filter(node -> !node.toString().equals(" ")).collect(Collectors.toList());
-
-        for(Node node: elements){
-          // CODE TO INDEX
-//          System.out.println(((Element) node).tagName());
-//          System.out.println(((Element) node).text());
-        }
-        break;
+      for(Element element: documentsInFile){
+        List<Node> nodes =  element.childNodes().stream().filter(node -> !node.toString().equals(" ")).collect(Collectors.toList());
+        iwriter.addDocument(createDocument(nodes));
       }
-      break;
     }
   }
 
-  public static void main(String[] args) throws IOException {
-    LatimesDocumentParser latimesDocumentParser =  new LatimesDocumentParser(new EnglishAnalyzer(), new BM25Similarity(1.2f, 0.8f));
-    latimesDocumentParser.parseDocument();
+  private Document createDocument(List<Node> nodes){
+    Document document = new Document();
+    for(Node node: nodes){
+      // do additional processing before indexing as per requirement
+      document.add(new TextField(((Element) node).tagName(), ((Element) node).text(), Field.Store.YES));
+    }
+    return document;
   }
 }
