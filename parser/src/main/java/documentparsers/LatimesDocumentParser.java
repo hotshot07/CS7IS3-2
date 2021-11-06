@@ -18,30 +18,37 @@ public class LatimesDocumentParser {
   String DIR_PATH = "data/data/latimes/";
   IndexWriter iwriter;
 
-  public LatimesDocumentParser(IndexWriter indexWriter){
+  public LatimesDocumentParser(IndexWriter indexWriter) {
     this.iwriter = indexWriter;
   }
 
-  public void parseDocument() throws IOException {
+  public void parseDocuments() throws IOException {
     File directoryPath = new File(DIR_PATH);
-    List<File> filesList = Arrays.stream(Objects.requireNonNull(directoryPath.listFiles())).filter(file -> !file.toString().toLowerCase(Locale.ROOT).endsWith(".txt")).collect(Collectors.toList());
+    List<File> filesList =
+        Arrays.stream(Objects.requireNonNull(directoryPath.listFiles()))
+            .filter(file -> !file.toString().toLowerCase(Locale.ROOT).endsWith(".txt"))
+            .collect(Collectors.toList());
 
-    for( File file: filesList){
+    for (File file : filesList) {
       org.jsoup.nodes.Document fileToParse = Jsoup.parse(file, "UTF-8");
-      List<Element> documentsInFile =  fileToParse.select("doc");
+      List<Element> documentsInFile = fileToParse.select("doc");
 
-      for(Element element: documentsInFile){
-        List<Node> nodes =  element.childNodes().stream().filter(node -> !node.toString().equals(" ")).collect(Collectors.toList());
+      for (Element element : documentsInFile) {
+        List<Node> nodes =
+            element.childNodes().stream()
+                .filter(node -> !node.toString().equals(" "))
+                .collect(Collectors.toList());
         iwriter.addDocument(createDocument(nodes));
       }
     }
   }
 
-  private Document createDocument(List<Node> nodes){
+  private Document createDocument(List<Node> nodes) {
     Document document = new Document();
-    for(Node node: nodes){
+    for (Node node : nodes) {
       // do additional processing before indexing as per requirement
-      document.add(new TextField(((Element) node).tagName(), ((Element) node).text(), Field.Store.YES));
+      document.add(
+          new TextField(((Element) node).tagName(), ((Element) node).text(), Field.Store.YES));
     }
     return document;
   }

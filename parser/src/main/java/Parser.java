@@ -15,26 +15,26 @@ public class Parser {
   private final Analyzer analyzer;
   private final Similarity similarity;
 
-  public Parser(Analyzer analyzer, Similarity similarity){
+  public Parser(Analyzer analyzer, Similarity similarity) {
     this.analyzer = analyzer;
     this.similarity = similarity;
   }
 
-  public void parser() throws IOException {
+  public void parse() throws IOException {
     // Create index and pass iwriter to parsers
     boolean indexDirectory = new File(INDEX_DIR).mkdir();
 
     Directory directory = FSDirectory.open(Paths.get(INDEX_DIR));
     IndexWriterConfig config = new IndexWriterConfig(analyzer);
     config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
-    config.setRAMBufferSizeMB(512);
+    config.setRAMBufferSizeMB(1024);
     config.setSimilarity(similarity);
 
     IndexWriter iwriter = new IndexWriter(directory, config);
 
     // adding all parsers here
-    LatimesDocumentParser latimesDocumentParser =  new LatimesDocumentParser(iwriter);
-    latimesDocumentParser.parseDocument();
+    LatimesDocumentParser latimesDocumentParser = new LatimesDocumentParser(iwriter);
+    latimesDocumentParser.parseDocuments();
 
     iwriter.close();
     directory.close();
