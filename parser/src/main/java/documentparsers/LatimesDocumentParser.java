@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static utils.Utils.replacePunctuation;
+import static utils.CommonUtils.replacePunctuation;
 
 public class LatimesDocumentParser {
   private final String DIR_PATH = "data/data/latimes/";

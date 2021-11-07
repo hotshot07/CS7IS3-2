@@ -2,7 +2,7 @@ package utils;
 
 import java.util.Locale;
 
-public class Utils {
+public class CommonUtils {
 
   public static String replacePunctuation(String inputString) {
     return inputString.toLowerCase(Locale.ROOT).replaceAll("\\p{Punct}", " ");
