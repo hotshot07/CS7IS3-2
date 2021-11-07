@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.lang.StringBuilder;
 
 public class QueryHandler {
 	private static String TOP_TAG_START = "<top>";
@@ -95,12 +96,12 @@ public class QueryHandler {
 		}
 		return parsedQueries;
 	}
-	
-	// public static void main(String args[]) {
-	// 	String queryFilePath = "Data/topics";
-	// 	ArrayList<HashMap<String,String>> parsedQueries = new QueryHandler().parseQueryFile(queryFilePath);
-	// 	System.out.println(parsedQueries.size());
-	// 	System.out.println(parsedQueries.get(0));
-	// }
 
+	private static void processNarativeTAG(HashMap<String,String> query){
+		StringBuilder additionalDataToAppend = new StringBuilder();
+		StringBuilder removeDataFromQuery = new StringBuilder();
+
+		//Todo: Decide on the way to parse the narrative tag, find the relevant details to append to the query and remove any non relevant words.
+		//Update the current query. 
+	}
 }
