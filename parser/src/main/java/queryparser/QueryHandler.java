@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.lang.StringBuilder;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.similarities.*;
@@ -32,7 +32,7 @@ public class QueryHandler {
 
 	private ArrayList<Analyzer> analyzers;
 	private ArrayList<Similarity> similarities;
-	private ArrayList<HashMap<String,String>> parsedQueries;
+	private ArrayList<LinkedHashMap<String,String>> parsedQueries;
 	private String queryFilePath;
 	private Sting corpusName;
 	private static String RESULT_FILENAME_FORMAT = "RESULT_{}_{}.txt";
@@ -51,12 +51,12 @@ public class QueryHandler {
 		this.queryFilePath = filePath;
 		this.analyzers = analyzers;
 		this.similarities = similarities;
-		parsedQueries = new ArrayList<HashMap<String,String>>();
+		parsedQueries = new ArrayList<LinkedHashMap<String,String>>();
 	}
 	
 	/**
 	 * Reads the topics query file and parses the 50 queries
-	 * The queries are stored in a Arraylist of HashMaps.
+	 * The queries are stored in a Arraylist of LinkedHashMaps.
 	 * 
 	 * @param filePath
 	 * @return
@@ -66,7 +66,7 @@ public class QueryHandler {
 			BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(this.queryFilePath), StandardCharsets.UTF_8);
 			String currentLine = bufferedReader.readLine();
 			
-			HashMap<String,String> newQuery = new HashMap<String,String>();
+			LinkedHashMap<String,String> newQuery = new LinkedHashMap<String,String>();
             
             while (currentLine != null) {
             	
@@ -74,7 +74,7 @@ public class QueryHandler {
             		currentLine = bufferedReader.readLine();
             	
             	if(currentLine.startsWith(TOP_TAG_START)) {
-            		newQuery = new HashMap<String,String>();
+            		newQuery = new LinkedHashMap<String,String>();
             		currentLine = bufferedReader.readLine();
             	}
             	
@@ -143,7 +143,7 @@ public class QueryHandler {
 				PrintWriter resultsWriter = new PrintWriter(resultPath, "UTF-8");
 
 				int queryID = 0;
-				for(HashMap<String,String> query:parsedQueries.keySet()){
+				for(LinkedHashMap<String,String> query:parsedQueries.keySet()){
 					String queryString = prepareQueryString(query);
 
 					Query finalQuery = indexParser.parse(QueryParser.escape(queryString));
@@ -167,7 +167,7 @@ public class QueryHandler {
 		}
 	}
 
-	private static String prepareQueryString(HashMap<String,String> query){
+	private static String prepareQueryString(LinkedHashMap<String,String> query){
 		StringBuilder queryString = new StringBuilder();
 		//Need to perform query expansion and query refinement in this function. Default query generation for Phase 1.
 		queryString.append(query.get("title"));
@@ -175,7 +175,7 @@ public class QueryHandler {
 		return queryString.toString();
 	}
 
-	private static void processNarativeTAG(HashMap<String,String> query){
+	private static void processNarativeTAG(LinkedHashMap<String,String> query){
 		StringBuilder additionalDataToAppend = new StringBuilder();
 		StringBuilder removeDataFromQuery = new StringBuilder();
 
