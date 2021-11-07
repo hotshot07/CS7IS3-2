@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 
 public class Parser {
   String INDEX_DIR = "data/index";
+  private final String DIR_PATH = "data/data";
   private final Analyzer analyzer;
   private final Similarity similarity;
 
@@ -35,7 +36,7 @@ public class Parser {
     IndexWriter iwriter = new IndexWriter(directory, config);
 
     // adding all parsers here
-    LatimesDocumentParser latimesDocumentParser = new LatimesDocumentParser(iwriter);
+    LatimesDocumentParser latimesDocumentParser = new LatimesDocumentParser(iwriter, DIR_PATH);
     latimesDocumentParser.parseDocuments();
 
     iwriter.close();
