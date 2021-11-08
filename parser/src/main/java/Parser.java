@@ -1,23 +1,51 @@
-import java.io.IOException;
+import documentparsers.LatimesDocumentParser;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.search.similarities.Similarity;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 
-import constants.AnalyzerType;
-import documentparsers.DocumentParser;
-import documentparsers.FTDocumentParser;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 
 public class Parser {
-	public static void main(String args[]) {
-		String path = "D:\\TCD\\Sem1\\Information Retreival\\Assignment2data\\Assignment Two\\";
-		long startTime = System.currentTimeMillis();
-		try {
-			startTime = System.currentTimeMillis();
-			DocumentParser parser = new FTDocumentParser(AnalyzerType.ENGLISH, path);
-			parser.parse();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			System.out.println(
-					"Total Time in seconds ====== " + String.valueOf((System.currentTimeMillis() - startTime) / 1000));
-		}
-	}
+  static String INDEX_DIR = "data/index";
+  final String DATA_DIR = "data/data";
+  final Analyzer analyzer;
+  final Similarity similarity;
 
+  public Parser(Analyzer analyzer, Similarity similarity) {
+    this.analyzer = analyzer;
+    this.similarity = similarity;
+  }
+
+  public void parse() throws IOException {
+    // Create index and pass iwriter to parsers
+    boolean indexDirectory = new File(INDEX_DIR).mkdir();
+
+    Directory directory = FSDirectory.open(Paths.get(INDEX_DIR));
+    IndexWriterConfig config = new IndexWriterConfig(analyzer);
+    config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+    config.setRAMBufferSizeMB(1024);
+    config.setSimilarity(similarity);
+
+    IndexWriter iwriter = new IndexWriter(directory, config);
+
+    // adding all parsers here
+    LatimesDocumentParser latimesDocumentParser = new LatimesDocumentParser(iwriter, DATA_DIR);
+    latimesDocumentParser.parseDocuments();
+
+    iwriter.close();
+    directory.close();
+  }
+
+  // This is how the Parser class can be used in the "querier" module,
+  public static void main(String[] args) throws IOException {
+    Parser parser = new Parser(new EnglishAnalyzer(), new BM25Similarity());
+    parser.parse();
+  }
 }
