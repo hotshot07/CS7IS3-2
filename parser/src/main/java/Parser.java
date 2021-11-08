@@ -13,10 +13,10 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 public class Parser {
-  String INDEX_DIR = "data/index";
-  private final String DIR_PATH = "data/data";
-  private final Analyzer analyzer;
-  private final Similarity similarity;
+  static String INDEX_DIR = "data/index";
+  final String DATA_DIR = "data/data";
+  final Analyzer analyzer;
+  final Similarity similarity;
 
   public Parser(Analyzer analyzer, Similarity similarity) {
     this.analyzer = analyzer;
@@ -36,7 +36,7 @@ public class Parser {
     IndexWriter iwriter = new IndexWriter(directory, config);
 
     // adding all parsers here
-    LatimesDocumentParser latimesDocumentParser = new LatimesDocumentParser(iwriter, DIR_PATH);
+    LatimesDocumentParser latimesDocumentParser = new LatimesDocumentParser(iwriter, DATA_DIR);
     latimesDocumentParser.parseDocuments();
 
     iwriter.close();
