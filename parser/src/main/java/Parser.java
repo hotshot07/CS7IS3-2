@@ -16,8 +16,7 @@ import documentparsers.LatimesDocumentParser;
 
 public class Parser {
 	static String INDEX_DIR = "data/index";
-	// final String DATA_DIR = "data/";
-	final String DATA_DIR = "D:\\TCD\\Sem1\\Information Retreival\\Assignment2data\\Assignment Two\\";
+	final String DATA_DIR = "data/";
 	final Analyzer analyzer;
 	final Similarity similarity;
 
