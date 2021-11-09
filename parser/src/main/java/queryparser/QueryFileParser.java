@@ -11,7 +11,7 @@ import java.util.LinkedHashMap;
 // this class is just used to parse queries from the file and return
 // a ArrayList<LinkedHashMap<String, String>> of them
 public class QueryFileParser {
-  private String queryFilePath;
+  private final String queryFilePath;
 
   public QueryFileParser(String filePath) {
     this.queryFilePath = filePath;
