@@ -10,12 +10,10 @@ import org.apache.lucene.analysis.standard.ClassicAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.similarities.*;
-import query.QueryHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class Querier {
 
@@ -56,11 +54,11 @@ public class Querier {
         parser.parse();
 
         // waiting 1 second before querying
-        TimeUnit.SECONDS.sleep(1);
-
-        // Querying the index using the same analyser/similarity pair
-        QueryHandler queryHandler = new QueryHandler(analyser, similarity, 1400);
-        queryHandler.executeQueries();
+        //        TimeUnit.SECONDS.sleep(1);
+        //
+        //        // Querying the index using the same analyser/similarity pair
+        //        QueryHandler queryHandler = new QueryHandler(analyser, similarity, 1400);
+        //        queryHandler.executeQueries();
       }
     }
   }

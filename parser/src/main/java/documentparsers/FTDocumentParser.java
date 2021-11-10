@@ -52,22 +52,22 @@ public class FTDocumentParser {
 
   // Does it do anything? dead code?
 
-//  public static FieldType getField(CranFieldType type) {
-//    FieldType ft = null;
-//    switch (type) {
-//      case TITLE:
-//      case BODY:
-//        ft = new FieldType();
-//        ft.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
-//        ft.setStored(true);
-//        ft.setTokenized(true);
-//        ft.setStoreTermVectors(true);
-//        break;
-//      default:
-//        break;
-//    }
-//    return ft;
-//  }
+  //  public static FieldType getField(CranFieldType type) {
+  //    FieldType ft = null;
+  //    switch (type) {
+  //      case TITLE:
+  //      case BODY:
+  //        ft = new FieldType();
+  //        ft.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+  //        ft.setStored(true);
+  //        ft.setTokenized(true);
+  //        ft.setStoreTermVectors(true);
+  //        break;
+  //      default:
+  //        break;
+  //    }
+  //    return ft;
+  //  }
 
   public void parseFile(Path p) {
     Document document = null;
@@ -92,7 +92,6 @@ public class FTDocumentParser {
             document.add(new TextField("title", replacePunctuation(title), Field.Store.YES));
             document.add(new TextField("content", replacePunctuation(body), Field.Store.YES));
             iwriter.addDocument(document);
-            document = null;
           }
         }
       } catch (IOException e) {
