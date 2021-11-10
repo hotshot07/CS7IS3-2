@@ -29,7 +29,7 @@ public class LatimesDocumentParser {
     this.LATIMES_DIR_PATH = DIR_PATH + "/latimes";
   }
 
-  public void parseDocuments() throws IOException {
+  public void parseAndIndexDocs() throws IOException {
     long start_time = System.currentTimeMillis();
     File directoryPath = new File(LATIMES_DIR_PATH);
     List<File> filesList =
@@ -87,7 +87,7 @@ public class LatimesDocumentParser {
     document.add(
         new TextField("title", replacePunctuation(title.toString().strip()), Field.Store.YES));
     document.add(
-        new TextField("text", replacePunctuation(allText.toString().strip()), Field.Store.YES));
+        new TextField("content", replacePunctuation(allText.toString().strip()), Field.Store.YES));
 
     return document;
   }
