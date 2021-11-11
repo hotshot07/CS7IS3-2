@@ -31,6 +31,7 @@ public class FbisParser {
 
   public FbisParser(IndexWriter indexWriter) {
     this.indexWriter = indexWriter;
+
   }
 
   public void parseAndIndexDocs() throws IOException {

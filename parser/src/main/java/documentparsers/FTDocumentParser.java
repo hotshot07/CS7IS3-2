@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static constants.DirectoryConstants.DATA_DIR;
+
 import static utils.CommonUtils.replacePunctuation;
 
 public class FTDocumentParser {
@@ -26,6 +27,7 @@ public class FTDocumentParser {
   private final IndexWriter iwriter;
 
   public FTDocumentParser(IndexWriter iwriter) {
+
     this.iwriter = iwriter;
   }
 

@@ -14,18 +14,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+
 import static constants.DirectoryConstants.DATA_DIR;
+
 import static utils.CommonUtils.replacePunctuation;
 
 public class Fr94Parser {
   public static ArrayList<File> files = new ArrayList<File>();
   public static ArrayList<org.apache.lucene.document.Document> docDatas =
       new ArrayList<org.apache.lucene.document.Document>();
+
   private final String FR_DIR_PATH = DATA_DIR + "/fr94";
   private final IndexWriter iwriter;
 
   public Fr94Parser(IndexWriter indexWriter) {
     this.iwriter = indexWriter;
+
   }
 
   public void parseAndIndexDocs() throws IOException {

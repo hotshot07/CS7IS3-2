@@ -6,13 +6,16 @@ import org.apache.lucene.search.similarities.Similarity;
 import query.QueryHandler;
 import utils.StopWordGenerator;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import static constants.DirectoryConstants.INDEX_DIR;
 import static constants.DirectoryConstants.RESULTS_DIR;
+
 
 public class Querier {
 
@@ -55,11 +58,11 @@ public class Querier {
         parser.parseAndIndex();
 
         // waiting 1 second before querying
-        //        TimeUnit.SECONDS.sleep(1);
-
+        TimeUnit.SECONDS.sleep(1);
         // Querying the index using the same analyser/similarity pair
         QueryHandler queryHandler = new QueryHandler(analyser, similarity, 1000);
         queryHandler.executeQueries();
+
       }
     }
   }
