@@ -9,13 +9,12 @@ import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
+import static constants.DirectoryConstants.INDEX_DIR;
+
 public class Parser {
-  final String INDEX_DIR = "data/index";
-  final String DATA_DIR = "data/data";
   final Analyzer analyzer;
   final Similarity similarity;
 
@@ -24,9 +23,7 @@ public class Parser {
     this.similarity = similarity;
   }
 
-  public void parse() {
-    // Create index and pass iwriter to parsers
-    boolean indexDirectory = new File(INDEX_DIR).mkdir();
+  public void parseAndIndex() {
 
     IndexWriterConfig config = new IndexWriterConfig(analyzer);
     config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
@@ -36,16 +33,16 @@ public class Parser {
     try (Directory directory = FSDirectory.open(Paths.get(INDEX_DIR));
         IndexWriter iwriter = new IndexWriter(directory, config)) {
 
-      LatimesDocumentParser latimesDocumentParser = new LatimesDocumentParser(iwriter, DATA_DIR);
+      LatimesDocumentParser latimesDocumentParser = new LatimesDocumentParser(iwriter);
       latimesDocumentParser.parseAndIndexDocs();
 
-      FTDocumentParser parser = new FTDocumentParser(iwriter, DATA_DIR);
+      FTDocumentParser parser = new FTDocumentParser(iwriter);
       parser.parseAndIndexDocs();
 
-      Fr94Parser fr94Parser = new Fr94Parser(iwriter, DATA_DIR);
+      Fr94Parser fr94Parser = new Fr94Parser(iwriter);
       fr94Parser.parseAndIndexDocs();
 
-      FbisParser fbisParser = new FbisParser(iwriter, DATA_DIR);
+      FbisParser fbisParser = new FbisParser(iwriter);
       fbisParser.parseAndIndexDocs();
 
     } catch (IOException e) {
