@@ -15,21 +15,21 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static constants.DirectoryConstants.DATA_DIR;
 import static utils.CommonUtils.replacePunctuation;
 
 public class LatimesDocumentParser {
-  private final String LATIMES_DIR_PATH;
+  private final String LATIMES_DIR_PATH = DATA_DIR + "/latimes";
   private final IndexWriter iwriter;
 
   private final Set<String> irrelevantTags =
       Set.of("docid", "date", "dateline", "length", "correction-date");
 
-  public LatimesDocumentParser(IndexWriter indexWriter, String DIR_PATH) {
+  public LatimesDocumentParser(IndexWriter indexWriter) {
     this.iwriter = indexWriter;
-    this.LATIMES_DIR_PATH = DIR_PATH + "/latimes";
   }
 
-  public void parseDocuments() throws IOException {
+  public void parseAndIndexDocs() throws IOException {
     long start_time = System.currentTimeMillis();
     File directoryPath = new File(LATIMES_DIR_PATH);
     List<File> filesList =
@@ -87,7 +87,7 @@ public class LatimesDocumentParser {
     document.add(
         new TextField("title", replacePunctuation(title.toString().strip()), Field.Store.YES));
     document.add(
-        new TextField("text", replacePunctuation(allText.toString().strip()), Field.Store.YES));
+        new TextField("content", replacePunctuation(allText.toString().strip()), Field.Store.YES));
 
     return document;
   }
