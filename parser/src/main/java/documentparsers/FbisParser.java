@@ -19,17 +19,18 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static constants.DirectoryConstants.DATA_DIR;
+
 public class FbisParser {
 
   private static BufferedReader br;
   private static final String[] IGNORE_FILES = {"readchg.txt", "readmefb.txt"};
 
-  private final String DIR_PATH;
+  private final String DIR_PATH = DATA_DIR + "/fbis";
   private final IndexWriter indexWriter;
 
-  public FbisParser(IndexWriter indexWriter, String DIR_PATH) {
+  public FbisParser(IndexWriter indexWriter) {
     this.indexWriter = indexWriter;
-    this.DIR_PATH = DIR_PATH + "/fbis";
   }
 
   public void parseAndIndexDocs() throws IOException {

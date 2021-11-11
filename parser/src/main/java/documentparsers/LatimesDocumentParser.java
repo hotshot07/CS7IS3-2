@@ -15,18 +15,18 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static constants.DirectoryConstants.DATA_DIR;
 import static utils.CommonUtils.replacePunctuation;
 
 public class LatimesDocumentParser {
-  private final String LATIMES_DIR_PATH;
+  private final String LATIMES_DIR_PATH = DATA_DIR + "/latimes";
   private final IndexWriter iwriter;
 
   private final Set<String> irrelevantTags =
       Set.of("docid", "date", "dateline", "length", "correction-date");
 
-  public LatimesDocumentParser(IndexWriter indexWriter, String DIR_PATH) {
+  public LatimesDocumentParser(IndexWriter indexWriter) {
     this.iwriter = indexWriter;
-    this.LATIMES_DIR_PATH = DIR_PATH + "/latimes";
   }
 
   public void parseAndIndexDocs() throws IOException {

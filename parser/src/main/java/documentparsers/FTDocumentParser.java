@@ -17,21 +17,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static constants.DirectoryConstants.DATA_DIR;
 import static utils.CommonUtils.replacePunctuation;
 
 public class FTDocumentParser {
 
   private static final String FT_PATH = "/ft";
-  private final String DIR_PATH;
   private final IndexWriter iwriter;
 
-  public FTDocumentParser(IndexWriter iwriter, String DIR_PATH) {
-    this.DIR_PATH = DIR_PATH;
+  public FTDocumentParser(IndexWriter iwriter) {
     this.iwriter = iwriter;
   }
 
   public void parseAndIndexDocs() throws IOException {
-    Path rootdir = Paths.get(DIR_PATH + FT_PATH);
+    Path rootdir = Paths.get(DATA_DIR + FT_PATH);
     System.out.println("Indexing Documents at Path = " + rootdir.getFileName());
     List<Path> directories = null;
     try (Stream<Path> f = Files.walk(rootdir)) {
