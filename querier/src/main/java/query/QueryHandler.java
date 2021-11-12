@@ -1,5 +1,19 @@
 package query;
 
+import static constants.DirectoryConstants.INDEX_DIR;
+import static constants.DirectoryConstants.RESULTS_DIR;
+import static constants.DirectoryConstants.TOPIC_PATH;
+import static utils.CommonUtils.replacePunctuation;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -13,19 +27,8 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
+
 import queryparser.QueryFileParser;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-
-import static constants.DirectoryConstants.*;
-import static utils.CommonUtils.replacePunctuation;
 
 public class QueryHandler {
   private final Analyzer analyzer;
@@ -102,11 +105,10 @@ public class QueryHandler {
 
   private String prepareQueryString(LinkedHashMap<String, String> query) {
     StringBuilder finalQueryString = new StringBuilder();
-
+    String title = replacePunctuation(query.get("description"));
     String desc = replacePunctuation(query.get("description"));
     String narrative = processNarrativeTag(query.get("narrative"));
-
-    return finalQueryString.append(desc).append(" ").append(narrative).toString();
+    return finalQueryString.append(title).append(" ").append(desc).append(" ").append(narrative).toString();
   }
 
   private String processNarrativeTag(String stringToProcess) {
