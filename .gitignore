@@ -58,3 +58,5 @@ hs_err_pid*
 .settings/
 parser/.classpath
 parser/.project
+
+Results/*
