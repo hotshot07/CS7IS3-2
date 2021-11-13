@@ -105,7 +105,7 @@ public class QueryHandler {
 
   private String prepareQueryString(LinkedHashMap<String, String> query) {
     StringBuilder finalQueryString = new StringBuilder();
-    String title = replacePunctuation(query.get("description"));
+    String title = replacePunctuation(query.get("title"));
     String desc = replacePunctuation(query.get("description"));
     String narrative = processNarrativeTag(query.get("narrative"));
     return finalQueryString.append(title).append(" ").append(desc).append(" ").append(narrative).toString();
