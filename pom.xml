@@ -12,6 +12,4 @@
         <module>parser</module>
         <module>querier</module>
     </modules>
-
-
 </project>

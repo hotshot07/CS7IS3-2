@@ -1,5 +1,19 @@
 package query;
 
+import static constants.DirectoryConstants.INDEX_DIR;
+import static constants.DirectoryConstants.RESULTS_DIR;
+import static constants.DirectoryConstants.TOPIC_PATH;
+import static utils.CommonUtils.replacePunctuation;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -13,15 +27,8 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
-import queryparser.QueryFileParser;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Locale;
+import queryparser.QueryFileParser;
 
 public class QueryHandler {
   private final Analyzer analyzer;
@@ -38,39 +45,44 @@ public class QueryHandler {
 
     long start_time = System.currentTimeMillis();
     // Configure the index details to query
-    IndexReader indexReader = DirectoryReader.open(FSDirectory.open(Paths.get("data/index")));
+    IndexReader indexReader = DirectoryReader.open(FSDirectory.open(Paths.get(INDEX_DIR)));
     IndexSearcher indexSearcher = new IndexSearcher(indexReader);
     indexSearcher.setSimilarity(similarity);
 
+    // TODO: figure out booster values
+    HashMap<String, Float> booster = new HashMap<String, Float>();
+    booster.put("title", 0.50f);
+    booster.put("content", 1.1f);
+
     MultiFieldQueryParser indexParser =
-        new MultiFieldQueryParser(new String[] {"title", "content"}, analyzer);
+        new MultiFieldQueryParser(new String[] {"title", "content"}, analyzer, booster);
 
     String filename =
-        "Results/results_"
+        RESULTS_DIR
+            + "/results_"
             + analyzer.getClass().getSimpleName().toLowerCase(Locale.ROOT)
             + "_"
             + similarity.getClass().getSimpleName().toLowerCase(Locale.ROOT);
 
     PrintWriter resultsWriter = new PrintWriter(filename, StandardCharsets.UTF_8);
 
-    QueryFileParser queryFileParser = new QueryFileParser("data/queries");
+    QueryFileParser queryFileParser = new QueryFileParser(TOPIC_PATH);
     ArrayList<LinkedHashMap<String, String>> parsedQueries = queryFileParser.parseQueryFile();
 
-    int queryID = 0;
+    int queryId = 0;
     for (LinkedHashMap<String, String> query : parsedQueries) {
-      // preparing query here
-      // String queryString = prepareQueryString(query);
 
-      Query finalQuery = indexParser.parse(QueryParser.escape("queryString"));
+      String queryString = prepareQueryString(query);
+      Query finalQuery = indexParser.parse(QueryParser.escape(queryString));
 
       TopDocs results = indexSearcher.search(finalQuery, max_results);
       ScoreDoc[] hits = results.scoreDocs;
-
+      queryId += 1;
       // To write the results for each hit in the format expected by the trec_eval tool.
       for (int i = 0; i < hits.length; i++) {
         Document document = indexSearcher.doc(hits[i].doc);
         resultsWriter.println(
-            ++queryID
+            queryId
                 + " Q0 "
                 + document.get("docno")
                 + " "
@@ -87,24 +99,33 @@ public class QueryHandler {
     System.out.format(
         "Result file %s generated in "
             + (System.currentTimeMillis() - start_time)
-            + " milliseconds");
+            + " milliseconds",
+        filename);
+  }
+
+  private String prepareQueryString(LinkedHashMap<String, String> query) {
+    StringBuilder finalQueryString = new StringBuilder();
+    String title = replacePunctuation(query.get("title"));
+    String desc = replacePunctuation(query.get("description"));
+    String narrative = processNarrativeTag(query.get("narrative"));
+    return finalQueryString.append(title).append(" ").append(desc).append(" ").append(narrative).toString();
+  }
+
+  private String processNarrativeTag(String stringToProcess) {
+
+    // TODO: work on synonyms to append to query string
+    StringBuilder additionalDataToAppend = new StringBuilder();
+
+    String[] unprocessedString =
+        stringToProcess.strip().toLowerCase(Locale.ROOT).split("\\p{Punct}");
+    StringBuilder processedString = new StringBuilder();
+
+    for (String str : unprocessedString) {
+      str = str.strip();
+      if (!((str.contains("not") && str.contains("relevant")) || str.contains("irrelevant"))) {
+        processedString.append(str.replaceAll("\n", " ")).append(" ");
+      }
+    }
+    return replacePunctuation(processedString.toString());
   }
 }
-
-//  private static String prepareQueryString(LinkedHashMap<String, String> query) {
-//    StringBuilder queryString = new StringBuilder();
-//    // Need to perform query expansion and query refinement in this function. Default query
-//    // generation for Phase 1.
-//    queryString.append(query.get("title"));
-//    queryString.append(query.get("description"));
-//    return queryString.toString();
-//  }
-//
-//  private static void processNarativeTAG(LinkedHashMap<String, String> query) {
-//    StringBuilder additionalDataToAppend = new StringBuilder();
-//    StringBuilder removeDataFromQuery = new StringBuilder();
-//
-//    // Todo: Decide on the way to parse the narrative tag, find the relevant details to append to
-//    // the query and remove any non relevant words.
-//    // Update the current query.
-//  }
