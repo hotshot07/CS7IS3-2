@@ -52,7 +52,7 @@ public class QueryHandler {
     booster.put("content", 1.1f);
 
     MultiFieldQueryParser indexParser =
-        new MultiFieldQueryParser(new String[] {"title", "content"}, analyzer, booster);
+        new MultiFieldQueryParser(new String[] {"title", "content"}, analyzer /* booster*/);
 
     String filename =
         RESULTS_DIR
@@ -95,7 +95,7 @@ public class QueryHandler {
     System.out.format(
         "Result file %s generated in "
             + (System.currentTimeMillis() - start_time)
-            + " milliseconds",
+            + " milliseconds\n",
         filename);
   }
 

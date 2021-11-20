@@ -75,7 +75,7 @@ public class LatimesDocumentParser {
       // if tag is not empty AND text is not empty AND tag is not part of irrelevantTags set
       if (!tag.equals("") && !text.equals("") && !irrelevantTags.contains(tag)) {
         if (tag.equals("docno")) {
-          document.add(new StringField(tag, text, Field.Store.YES));
+          document.add(new StringField(tag, ((Element) node).text(), Field.Store.YES));
         } else if (tag.equals("headline") || tag.equals("byline")) {
           title.append(text).append(" ");
         } else {
