@@ -52,8 +52,8 @@ public class Querier {
     for (Analyzer analyser : analysers) {
       for (Similarity similarity : similarities) {
         // creating index for the particular analyser and similarity
-        Parser parser = new Parser(analyser, similarity);
-        parser.parseAndIndex();
+        //        Parser parser = new Parser(analyser, similarity);
+        //        parser.parseAndIndex();
 
         // waiting 1 second before querying
         TimeUnit.SECONDS.sleep(1);

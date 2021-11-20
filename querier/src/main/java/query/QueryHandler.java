@@ -52,7 +52,7 @@ public class QueryHandler {
     booster.put("content", 1.1f);
 
     MultiFieldQueryParser indexParser =
-        new MultiFieldQueryParser(new String[] {"title", "content"}, analyzer /* booster*/);
+        new MultiFieldQueryParser(new String[] {"title", "content"}, analyzer, booster);
 
     String filename =
         RESULTS_DIR
