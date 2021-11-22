@@ -7,10 +7,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 import queryparser.QueryFileParser;
@@ -33,9 +30,9 @@ public class QueryHandler {
   private final Similarity similarity;
   private final int max_results;
 
-  private static String RELEVANT_PHRASES_REGEX = "a relevant document identifies|a relevant document could|a relevant document may|a relevant document must|a relevant document will|a document will|to be relevant|relevant documents|a document must|relevant|will contain|will discuss|will provide|must cite";
+  private static final String RELEVANT_PHRASES_REGEX = "a relevant document identifies|a relevant document could|a relevant document may|a relevant document must|a relevant document will|a document will|to be relevant|relevant documents|a document must|relevant|will contain|will discuss|will provide|must cite";
 
-  private static String IRRELEVANT_PHRASES_REGEX = "are also not relevant|are not relevant|are irrelevant|is not relevant|not|NOT";
+  private static final String IRRELEVANT_PHRASES_REGEX = "are also not relevant|are not relevant|are irrelevant|is not relevant|not|NOT";
 
   public QueryHandler(Analyzer analyzer, Similarity similarity, int max_results) {
     this.analyzer = analyzer;
@@ -52,7 +49,7 @@ public class QueryHandler {
     indexSearcher.setSimilarity(similarity);
 
     // TODO: figure out booster values
-    HashMap<String, Float> booster = new HashMap<String, Float>();
+    HashMap<String, Float> booster = new HashMap<>();
     booster.put("title", 0.50f);
     booster.put("content", 1.1f);
 
@@ -66,7 +63,7 @@ public class QueryHandler {
             + "_"
             + similarity.getClass().getSimpleName().toLowerCase(Locale.ROOT);
 
-    PrintWriter resultsWriter = new PrintWriter(filename, StandardCharsets.UTF_8);
+    PrintWriter resultsWriter = new PrintWriter(filename, String.valueOf(StandardCharsets.UTF_8));
 
     QueryFileParser queryFileParser = new QueryFileParser(TOPIC_PATH);
     ArrayList<LinkedHashMap<String, String>> parsedQueries = queryFileParser.parseQueryFile();
@@ -84,13 +81,13 @@ public class QueryHandler {
       Query descriptionQuery = indexParser.parse(QueryParser.escape(queryComponents.get("description")));
       booleanQuery.add(new BoostQuery(descriptionQuery, 1.7f), BooleanClause.Occur.SHOULD);
 
-      Query relevantNarrativeQuery = queryParser.parse(queryComponents.get("relevantNarrative"));
-      booleanQuery.add(new BoostQuery(narrativeQuery, 1.2f), BooleanClause.Occur.SHOULD);
+      Query relevantNarrativeQuery = indexParser.parse(queryComponents.get("relevantNarrative"));
+      booleanQuery.add(new BoostQuery(relevantNarrativeQuery, 1.2f), BooleanClause.Occur.SHOULD);
 
-      Query irrelevantNarrativeQuery = queryParser.parse(queryComponents.get("irrelevantNarrative"));
+      Query irrelevantNarrativeQuery = indexParser.parse(queryComponents.get("irrelevantNarrative"));
       booleanQuery.add(new BoostQuery(irrelevantNarrativeQuery, 2f), BooleanClause.Occur.FILTER);
 
-      TopDocs results = indexSearcher.search(finalQuery, max_results);
+      TopDocs results = indexSearcher.search(booleanQuery.build(), max_results);
       ScoreDoc[] hits = results.scoreDocs;
       String queryId = query.get("queryID");
       // To write the results for each hit in the format expected by the trec_eval tool.
@@ -119,11 +116,11 @@ public class QueryHandler {
   }
 
   private HashMap<String,String> refineQueryComponents(LinkedHashMap<String, String> query) {
-    HashMap<String,String> queryComponents = new HashMap<String,String>();
+    HashMap<String,String> queryComponents = new HashMap<>();
 
     //replace punctuation for title and description
-    queryComponents.put("title",replacePunctuation(query.get("title"));
-    queryComponents.put("description",replacePunctuation(query.get("description"));
+    queryComponents.put("title",replacePunctuation(query.get("title")));
+    queryComponents.put("description",replacePunctuation(query.get("description")));
 
     //Process the narrative tag and split into relevant and irrelevant narratives. Relevant: Query Augmentation, irrelevant: Query Refinement
     String[] processedNarrative = processNarrativeTag(query.get("narrative"));
@@ -150,8 +147,8 @@ public class QueryHandler {
             }
             index = breakIterator.current();
         }
-        processedNarrative[0] = relevantNarrative;
-        processedNarrative[1] = irrelevantNarrative;
+        processedNarrative[0] = relevantNarrative.toString();
+        processedNarrative[1] = irrelevantNarrative.toString();
         return processedNarrative;
     
   }
