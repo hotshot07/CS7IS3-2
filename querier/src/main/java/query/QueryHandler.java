@@ -32,6 +32,10 @@ public class QueryHandler {
   private final Similarity similarity;
   private final int max_results;
 
+  private static String RELEVANT_PHRASES_REGEX = "a relevant document identifies|a relevant document could|a relevant document may|a relevant document must|a relevant document will|a document will|to be relevant|relevant documents|a document must|relevant|will contain|will discuss|will provide|must cite";
+
+  private static String IRRELEVANT_PHRASES_REGEX = "are also not relevant|are not relevant|are irrelevant|is not relevant|not|NOT";
+
   public QueryHandler(Analyzer analyzer, Similarity similarity, int max_results) {
     this.analyzer = analyzer;
     this.similarity = similarity;
@@ -67,9 +71,23 @@ public class QueryHandler {
     ArrayList<LinkedHashMap<String, String>> parsedQueries = queryFileParser.parseQueryFile();
 
     for (LinkedHashMap<String, String> query : parsedQueries) {
+      HashMap<String,String> queryComponents = refineQueryComponents(query);
+      
+      BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
 
-      String queryString = prepareQueryString(query);
-      Query finalQuery = indexParser.parse(QueryParser.escape(queryString));
+      //Simple seperate queries for title and description
+      //TODO: Need to tune the hyperparameters
+      Query titleQuery = indexParser.parse(QueryParser.escape(queryComponents.get("title")));
+      booleanQuery.add(new BoostQuery(titleQuery, 4f), BooleanClause.Occur.SHOULD);
+
+      Query descriptionQuery = indexParser.parse(QueryParser.escape(queryComponents.get("description")));
+      booleanQuery.add(new BoostQuery(descriptionQuery, 1.7f), BooleanClause.Occur.SHOULD);
+
+      Query relevantNarrativeQuery = queryParser.parse(queryComponents.get("relevantNarrative"));
+      booleanQuery.add(new BoostQuery(narrativeQuery, 1.2f), BooleanClause.Occur.SHOULD);
+
+      Query irrelevantNarrativeQuery = queryParser.parse(queryComponents.get("irrelevantNarrative"));
+      booleanQuery.add(new BoostQuery(irrelevantNarrativeQuery, 2f), BooleanClause.Occur.FILTER);
 
       TopDocs results = indexSearcher.search(finalQuery, max_results);
       ScoreDoc[] hits = results.scoreDocs;
@@ -99,35 +117,41 @@ public class QueryHandler {
         filename);
   }
 
-  private String prepareQueryString(LinkedHashMap<String, String> query) {
-    StringBuilder finalQueryString = new StringBuilder();
-    String title = replacePunctuation(query.get("title"));
-    String desc = replacePunctuation(query.get("description"));
-    String narrative = processNarrativeTag(query.get("narrative"));
-    return finalQueryString
-        .append(title)
-        .append(" ")
-        .append(desc)
-        .append(" ")
-        .append(narrative)
-        .toString();
+  private HashMap<String,String> refineQueryComponents(LinkedHashMap<String, String> query) {
+    HashMap<String,String> queryComponents = new HashMap<String,String>();
+
+    //replace punctuation for title and description
+    queryComponents.put("title",replacePunctuation(query.get("title"));
+    queryComponents.put("description",replacePunctuation(query.get("description"));
+
+    //Process the narrative tag and split into relevant and irrelevant narratives. Relevant: Query Augmentation, irrelevant: Query Refinement
+    String[] processedNarrative = processNarrativeTag(query.get("narrative"));
+    queryComponents.put("relevantNarrative",processedNarrative[0]);
+    queryComponents.put("irrelevantNarrative",processedNarrative[1]);
+    return queryComponents;
   }
 
-  private String processNarrativeTag(String stringToProcess) {
+  private String[] processNarrativeTag(String narrativeString) {
+        StringBuilder relevantNarrative = new StringBuilder();
+        StringBuilder irrelevantNarrative = new StringBuilder();
+        String[] processedNarrative = new String[2];
 
-    // TODO: work on synonyms to append to query string
-    StringBuilder additionalDataToAppend = new StringBuilder();
+        BreakIterator breakIterator = BreakIterator.getSentenceInstance();
+        breakIterator.setText(narrativeString);
+        int index = 0;
+        while (breakIterator.next() != BreakIterator.DONE) {
+            String sentence = narrativeString.substring(index, breakIterator.current());
 
-    String[] unprocessedString =
-        stringToProcess.strip().toLowerCase(Locale.ROOT).split("\\p{Punct}");
-    StringBuilder processedString = new StringBuilder();
-
-    for (String str : unprocessedString) {
-      str = str.strip();
-      if (!((str.contains("not") && str.contains("relevant")) || str.contains("irrelevant"))) {
-        processedString.append(str.replaceAll("\n", " ")).append(" ");
-      }
-    }
-    return replacePunctuation(processedString.toString());
+            if (!sentence.contains("not relevant") && !sentence.contains("irrelevant")) {
+                relevantNarrative.append(sentence.replaceAll(RELEVANT_PHRASES_REGEX,""));
+            } else {
+                irrelevantNarrative.append(sentence.replaceAll(IRRELEVANT_PHRASES_REGEX, ""));
+            }
+            index = breakIterator.current();
+        }
+        processedNarrative[0] = relevantNarrative;
+        processedNarrative[1] = irrelevantNarrative;
+        return processedNarrative;
+    
   }
 }
