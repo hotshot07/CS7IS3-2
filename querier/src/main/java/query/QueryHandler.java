@@ -113,6 +113,7 @@ public class QueryHandler {
         .toString();
   }
 
+  //
   private String processNarrativeTag(String stringToProcess) {
 
     // TODO: work on synonyms to append to query string
