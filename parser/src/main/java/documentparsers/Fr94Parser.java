@@ -14,9 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-
 import static constants.DirectoryConstants.DATA_DIR;
-
 import static utils.CommonUtils.replacePunctuation;
 
 public class Fr94Parser {
