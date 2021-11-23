@@ -35,68 +35,76 @@ public class FbisParser {
   }
 
   public void parseAndIndexDocs() throws IOException {
-    loadFBISDocs(this.DIR_PATH, this.indexWriter);
+    docFBIS(this.DIR_PATH, this.indexWriter);
   }
 
-  private void loadFBISDocs(String fbisDirectory, IndexWriter iwr) throws IOException {
-    Directory dir = FSDirectory.open(Paths.get(fbisDirectory));
+  private void docFBIS(String fbisDirec, IndexWriter iwr) throws IOException {
+    Directory fbisDir = FSDirectory.open(Paths.get(fbisDirec));
 
-    for (String fbisFile : dir.listAll()) {
-      if (!fbisFile.equals(IGNORE_FILES[0]) && !fbisFile.equals(IGNORE_FILES[1])) {
-        br = new BufferedReader(new FileReader(fbisDirectory + "/" + fbisFile));
-        System.out.println(fbisDirectory + "/" + fbisFile);
-        indexDocumentsFromFile(iwr);
+    for (String file : fbisDir.listAll()) {
+      if (!file.equals(IGNORE_FILES[0]) && !file.equals(IGNORE_FILES[1])) {
+        br = new BufferedReader(new FileReader(fbisDirec + "/" + file));
+        System.out.println(fbisDirec + "/" + file);
+        indexDoc(iwr);
       }
     }
   }
 
-  private void indexDocumentsFromFile(IndexWriter iwr) throws IOException {
-    String file = readAFile();
-    org.jsoup.nodes.Document document = Jsoup.parse(file);
+  private void indexDoc(IndexWriter iwr) throws IOException {
+	  
+	  StringBuilder sbld = new StringBuilder();
+      String buffRead = br.readLine();
+    try {
+
+        while (buffRead != null) {
+        	sbld.append(buffRead);
+        	sbld.append("\n");
+        	buffRead = br.readLine();
+        }
+      } finally {
+        br.close();
+      }
+    
+    org.jsoup.nodes.Document document = Jsoup.parse(sbld.toString());
 
     List<Element> list = document.getElementsByTag("doc");
     for (Element doc : list) {
 
       FbisTagsData fbisData = new FbisTagsData();
       if (doc.getElementsByTag(FbisTags.DOCNO.name()) != null)
-        fbisData.setDocNum(removeUnnecessaryTags(doc, FbisTags.DOCNO));
+        fbisData.setDocNum(removeTags(doc, FbisTags.DOCNO));
       if (doc.getElementsByTag(FbisTags.TEXT.name()) != null)
-        fbisData.setText(removeUnnecessaryTags(doc, FbisTags.TEXT));
+        fbisData.setText(removeTags(doc, FbisTags.TEXT));
       if (doc.getElementsByTag(FbisTags.TI.name()) != null)
-        fbisData.setTi(removeUnnecessaryTags(doc, FbisTags.TI));
+        fbisData.setTi(removeTags(doc, FbisTags.TI));
       fbisData.setAll(fbisData.getText() + " " + fbisData.getTi().trim());
       createFBISDocument(fbisData, iwr);
     }
   }
 
-  private String removeUnnecessaryTags(Element doc, FbisTags tag) {
+  private String removeTags(Element doc, FbisTags tag) {
 
-    Elements element = doc.getElementsByTag(tag.name());
-    Elements tempElement = element.clone();
-    // Remove any nested
-    deleteNestedTags(tempElement, tag);
-    String data = tempElement.toString();
-    // Remove any instance of "\n"
-    if (data.contains("\n")) data = data.replaceAll("\n", "").trim();
-    // Remove start and end tags
-    if (data.contains(("<" + tag.name() + ">").toLowerCase()))
-      data = data.replaceAll("<" + tag.name().toLowerCase() + ">", "").trim();
-    if (data.contains(("</" + tag.name() + ">").toLowerCase()))
-      data = data.replaceAll("</" + tag.name().toLowerCase() + ">", "").trim();
+    Elements ele = doc.getElementsByTag(tag.name());
+    Elements duplicateElement = ele.clone();
 
-    data = data.trim().replaceAll(" +", " ");
-    return data;
-  }
-
-  private void deleteNestedTags(Elements element, FbisTags currTag) {
-
-    for (FbisTags tag : FbisTags.values()) {
-      if (element.toString().contains("<" + tag.name().toLowerCase() + ">")
-          && element.toString().contains("</" + tag.name().toLowerCase() + ">")
-          && !tag.equals(currTag)) {
-        element.select(tag.toString()).remove();
+    
+    for (FbisTags tagValue : FbisTags.values()) {
+        if (ele.toString().contains("<" + tagValue.name().toLowerCase() + ">")
+            && ele.toString().contains("</" + tagValue.name().toLowerCase() + ">")
+            && !tagValue.equals(tag)) {
+        	ele.select(tagValue.toString()).remove();
+        }
       }
-    }
+    
+    String text = duplicateElement.toString();
+    if (text.contains("\n")) text = text.replaceAll("\n", "").trim();
+    if (text.contains(("<" + tag.name() + ">").toLowerCase()))
+    	text = text.replaceAll("<" + tag.name().toLowerCase() + ">", "").trim();
+    if (text.contains(("</" + tag.name() + ">").toLowerCase()))
+    	text = text.replaceAll("</" + tag.name().toLowerCase() + ">", "").trim();
+
+    text = text.trim().replaceAll(" +", " ");
+    return text;
   }
 
   private Document createFBISDocument(FbisTagsData fbisData, IndexWriter iwr) {
@@ -107,25 +115,8 @@ public class FbisParser {
     try {
       iwr.addDocument(document);
     } catch (IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     return document;
-  }
-
-  private String readAFile() throws IOException {
-    try {
-      StringBuilder sb = new StringBuilder();
-      String line = br.readLine();
-
-      while (line != null) {
-        sb.append(line);
-        sb.append("\n");
-        line = br.readLine();
-      }
-      return sb.toString();
-    } finally {
-      br.close();
-    }
   }
 }

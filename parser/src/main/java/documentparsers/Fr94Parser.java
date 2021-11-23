@@ -81,10 +81,10 @@ public class Fr94Parser {
 
       // building text
       textContent = docBody.text();
+      document.add(new StringField("docno", docId, Field.Store.YES));
       document.add(new TextField("title", replacePunctuation(title.strip()), Field.Store.YES));
       document.add(
           new TextField("content", replacePunctuation(textContent.strip()), Field.Store.YES));
-      document.add(new StringField("docno", docId, Field.Store.YES));
       docDatas.add(document);
     }
   }

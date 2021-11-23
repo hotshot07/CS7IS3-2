@@ -58,3 +58,6 @@ hs_err_pid*
 .settings/
 parser/.classpath
 parser/.project
+
+/trec_eval
+Results/*
