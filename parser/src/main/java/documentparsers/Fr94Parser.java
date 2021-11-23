@@ -20,12 +20,14 @@ import static constants.DirectoryConstants.DATA_DIR;
 import static utils.CommonUtils.replacePunctuation;
 
 public class Fr94Parser {
+
     public static ArrayList<File> files = new ArrayList<File>();
     public static ArrayList<org.apache.lucene.document.Document> docDatas =
             new ArrayList<org.apache.lucene.document.Document>();
 
     private final String FR_DIR_PATH = DATA_DIR + "/fr94";
     private final IndexWriter iwriter;
+    private final HashMap<String, Integer> ALL_ID = new HashMap<String, Integer>();
 
     public Fr94Parser(IndexWriter indexWriter) {
         this.iwriter = indexWriter;
@@ -63,6 +65,12 @@ public class Fr94Parser {
             Elements docIdField = doc.getElementsByTag("PARENT");
             if (docIdField.size() != 0) {
                 docId = docIdField.get(0).text();
+                if (ALL_ID.containsKey(docId)){
+                    ALL_ID.put(docId, ALL_ID.get(docId) + 1);
+                }
+                else{
+                    ALL_ID.put(docId, 0);}
+
             } else {
                 System.out.println("Missing doc id");
             }
@@ -80,8 +88,9 @@ public class Fr94Parser {
             }
 
             // building text
+            String updated_doc_id = docId + ALL_ID.get(docId).toString();
             textContent = docBody.text();
-            document.add(new StringField("docno", docId, Field.Store.YES));
+            document.add(new StringField("docno", updated_doc_id, Field.Store.YES));
             document.add(new TextField("title", replacePunctuation(title.strip()), Field.Store.YES));
             document.add(
                     new TextField("content", replacePunctuation(textContent.strip()), Field.Store.YES));
