@@ -24,9 +24,9 @@ public class Querier {
     // creating a list of analysers to iterate through
     List<Analyzer> analysers = new ArrayList<>();
     //    analysers.add(new SimpleAnalyzer());
-    //    analysers.add(new StandardAnalyzer());
+    //    analysers.add(new StandardAnalyzer(stopWordGenerator.getCharset()));
     analysers.add(new EnglishAnalyzer(stopWordGenerator.getCharset()));
-    //    analysers.add(new ClassicAnalyzer());
+    //    analysers.add(new ClassicAnalyzer(stopWordGenerator.getCharset()));
     //    analysers.add(new WhitespaceAnalyzer());
     //    analysers.add(
     //        new Analyzer() {
@@ -41,7 +41,7 @@ public class Querier {
     // creating a list of similarities
     List<Similarity> similarities = new ArrayList<>();
     //    similarities.add(new ClassicSimilarity());
-    similarities.add(new BM25Similarity(1.2F, 0.75F));
+    similarities.add(new BM25Similarity(0.8F, 0.75F));
     //    similarities.add(new LMDirichletSimilarity(1500));
     //    similarities.add(
     //        new MultiSimilarity(new Similarity[] {new BM25Similarity(), new AxiomaticF1LOG()}));
@@ -52,8 +52,8 @@ public class Querier {
     for (Analyzer analyser : analysers) {
       for (Similarity similarity : similarities) {
         // creating index for the particular analyser and similarity
-        Parser parser = new Parser(analyser, similarity);
-        parser.parseAndIndex();
+        //        Parser parser = new Parser(analyser, similarity);
+        //        parser.parseAndIndex();
 
         // waiting 1 second before querying
         TimeUnit.SECONDS.sleep(1);

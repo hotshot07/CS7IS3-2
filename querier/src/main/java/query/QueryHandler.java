@@ -48,8 +48,8 @@ public class QueryHandler {
 
     // TODO: figure out booster values
     HashMap<String, Float> booster = new HashMap<String, Float>();
-    booster.put("title", 0.50f);
-    booster.put("content", 1.1f);
+    booster.put("title", 0.08F);
+    booster.put("content", 1.1F);
 
     MultiFieldQueryParser indexParser =
         new MultiFieldQueryParser(new String[] {"title", "content"}, analyzer, booster);

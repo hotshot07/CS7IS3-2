@@ -33,19 +33,19 @@ printf "
 "
 
 # wait for sec to let them appreciate the art work
-sleep 1;
-
+#sleep 1;
+#
 printf "Running mvn clean and package\n"
-
+#
 mvn clean;
 mvn package;
-
+#
 sleep 1;
 
 printf "Removing previously created index and Results\n"
 
-rm -rf data/index
-rm -rf Results
+#rm -rf data/index
+#rm -rf Results
 
 printf "Executing JAR\n"
 java -jar querier/target/querier-1.0-SNAPSHOT-shaded.jar
