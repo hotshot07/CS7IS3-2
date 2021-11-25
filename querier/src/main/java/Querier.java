@@ -41,7 +41,7 @@ public class Querier {
     // creating a list of similarities
     List<Similarity> similarities = new ArrayList<>();
     //    similarities.add(new ClassicSimilarity());
-    similarities.add(new BM25Similarity(0.8F, 0.75F));
+    similarities.add(new BM25Similarity(0.8F, 0.8F));
     //    similarities.add(new LMDirichletSimilarity(1500));
     //    similarities.add(
     //        new MultiSimilarity(new Similarity[] {new BM25Similarity(), new AxiomaticF1LOG()}));
