@@ -33,19 +33,19 @@ printf "
 "
 
 # wait for sec to let them appreciate the art work
-sleep 1;
-
+#sleep 1;
+#
 printf "Running mvn clean and package\n"
-
+#
 mvn clean;
 mvn package;
-
+#
 sleep 1;
 
-printf "Removing previously created index and Results\n"
-
-rm -rf data/index
-rm -rf Results
+#printf "Removing previously created index and Results\n"
+#
+#rm -rf data/index
+#rm -rf Results
 
 printf "Executing JAR\n"
 java -jar querier/target/querier-1.0-SNAPSHOT-shaded.jar
@@ -56,6 +56,7 @@ for entry in "Results"/*
  do
    printf "\n%s \n" "$entry"
    ../trec_eval/trec_eval -m map data/QrelFile "$entry"
+   ../trec_eval/trec_eval -m map data/QrelFile2 "$entry"
    printf "\n"
  done
 
