@@ -56,6 +56,7 @@ for entry in "Results"/*
  do
    printf "\n%s \n" "$entry"
    ../trec_eval/trec_eval -m map data/QrelFile "$entry"
+   ../trec_eval/trec_eval -m map data/QrelFile2 "$entry"
    printf "\n"
  done
 

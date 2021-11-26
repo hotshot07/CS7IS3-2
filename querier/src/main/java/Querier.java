@@ -1,8 +1,7 @@
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.similarities.BM25Similarity;
-import org.apache.lucene.search.similarities.Similarity;
+import org.apache.lucene.search.similarities.*;
 import query.QueryHandler;
 import utils.StopWordGenerator;
 
@@ -28,26 +27,31 @@ public class Querier {
     analysers.add(new EnglishAnalyzer(stopWordGenerator.getCharset()));
     //    analysers.add(new ClassicAnalyzer(stopWordGenerator.getCharset()));
     //    analysers.add(new WhitespaceAnalyzer());
+
     //    analysers.add(
     //        new Analyzer() {
     //          @Override
     //          protected TokenStreamComponents createComponents(String s) {
-    //            Tokenizer tokenizer = new NGramTokenizer(1, 3);
-    //            TokenStream filter = new LowerCaseFilter(tokenizer);
-    //            return new TokenStreamComponents(tokenizer, filter);
+    //            WikipediaTokenizer src = new WikipediaTokenizer();
+    //            TokenStream result = new LowerCaseFilter(src);
+    //            result = new StopFilter(result, stopWordGenerator.getCharset());
+    //            result = new PorterStemFilter(result);
+    //            result = new LowerCaseFilter(result);
+    //            return new TokenStreamComponents(src, result);
     //          }
     //        });
 
     // creating a list of similarities
     List<Similarity> similarities = new ArrayList<>();
-    //    similarities.add(new ClassicSimilarity());
-    similarities.add(new BM25Similarity(0.8F, 0.8F));
-    //    similarities.add(new LMDirichletSimilarity(1500));
-    //    similarities.add(
-    //        new MultiSimilarity(new Similarity[] {new BM25Similarity(), new AxiomaticF1LOG()}));
-    //    similarities.add(new AxiomaticF1EXP());
-    //    similarities.add(new AxiomaticF1LOG());
-    //    similarities.add(new AxiomaticF2EXP());
+    similarities.add(new ClassicSimilarity());
+    similarities.add(new BM25Similarity(0.65F, 0.8F));
+    similarities.add(new LMDirichletSimilarity(1500));
+    similarities.add(
+        new MultiSimilarity(new Similarity[] {new BM25Similarity(), new AxiomaticF2EXP()}));
+    similarities.add(new AxiomaticF1EXP());
+    similarities.add(new AxiomaticF1LOG());
+    similarities.add(new AxiomaticF2EXP());
+    similarities.add(new AxiomaticF2LOG());
 
     for (Analyzer analyser : analysers) {
       for (Similarity similarity : similarities) {
