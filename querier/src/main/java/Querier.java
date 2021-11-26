@@ -1,7 +1,10 @@
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.similarities.*;
+import org.apache.lucene.search.similarities.AxiomaticF2EXP;
+import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.search.similarities.MultiSimilarity;
+import org.apache.lucene.search.similarities.Similarity;
 import query.QueryHandler;
 import utils.StopWordGenerator;
 
@@ -43,15 +46,16 @@ public class Querier {
 
     // creating a list of similarities
     List<Similarity> similarities = new ArrayList<>();
-    similarities.add(new ClassicSimilarity());
-    similarities.add(new BM25Similarity(0.65F, 0.8F));
-    similarities.add(new LMDirichletSimilarity(1500));
+    //    similarities.add(new ClassicSimilarity());
+    // similarities.add(new BM25Similarity(0.65F, 0.8F));
+    //    similarities.add(new LMDirichletSimilarity(1500));
     similarities.add(
-        new MultiSimilarity(new Similarity[] {new BM25Similarity(), new AxiomaticF2EXP()}));
-    similarities.add(new AxiomaticF1EXP());
-    similarities.add(new AxiomaticF1LOG());
+        new MultiSimilarity(
+            new Similarity[] {new BM25Similarity(1F, 0.95F), new AxiomaticF2EXP()}));
+    //    similarities.add(new AxiomaticF1EXP());
+    //    similarities.add(new AxiomaticF1LOG());
     similarities.add(new AxiomaticF2EXP());
-    similarities.add(new AxiomaticF2LOG());
+    // similarities.add(new AxiomaticF2LOG());
 
     for (Analyzer analyser : analysers) {
       for (Similarity similarity : similarities) {
