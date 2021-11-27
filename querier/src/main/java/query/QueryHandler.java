@@ -124,8 +124,8 @@ public class QueryHandler {
 
     //Process the narrative tag and split into relevant and irrelevant narratives. Relevant: Query Augmentation, irrelevant: Query Refinement
     String[] processedNarrative = processNarrativeTag(query.get("narrative"));
-    queryComponents.put("relevantNarrative",processedNarrative[0]);
-    queryComponents.put("irrelevantNarrative",processedNarrative[1]);
+    queryComponents.put("relevantNarrative",replacePunctuation(processedNarrative[0]));
+    queryComponents.put("irrelevantNarrative",replacePunctuation(processedNarrative[1]));
     return queryComponents;
   }
 
