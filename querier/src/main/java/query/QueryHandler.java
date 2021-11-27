@@ -30,7 +30,7 @@ public class QueryHandler {
   private final Similarity similarity;
   private final int max_results;
 
-  private static final String RELEVANT_PHRASES_REGEX = "a relevant document identifies|a relevant document could|a relevant document may|a relevant document must|a relevant document will|a document will|to be relevant|relevant documents|a document must|relevant|will contain|will discuss|will provide|must cite";
+  private static final String RELEVANT_PHRASES_REGEX = "a relevant document will focus|a relevant document identifies|a relevant document could|a relevant document may|a relevant document must|a relevant document will|a document will|to be relevant|relevant documents|a document must|relevant|will contain|will discuss|will provide|must cite";
 
   private static final String IRRELEVANT_PHRASES_REGEX = "are also not relevant|are not relevant|are irrelevant|is not relevant|not|NOT";
 
@@ -81,11 +81,15 @@ public class QueryHandler {
       Query descriptionQuery = indexParser.parse(QueryParser.escape(queryComponents.get("description")));
       booleanQuery.add(new BoostQuery(descriptionQuery, 1.7f), BooleanClause.Occur.SHOULD);
 
-      Query relevantNarrativeQuery = indexParser.parse(queryComponents.get("relevantNarrative"));
-      booleanQuery.add(new BoostQuery(relevantNarrativeQuery, 1.2f), BooleanClause.Occur.SHOULD);
+      if(!queryComponents.get("relevantNarrative").isEmpty()) {
+          Query relevantNarrativeQuery = indexParser.parse(queryComponents.get("relevantNarrative"));
+          booleanQuery.add(new BoostQuery(relevantNarrativeQuery, 2.5f), BooleanClause.Occur.MUST);
+      }
 
-      Query irrelevantNarrativeQuery = indexParser.parse(queryComponents.get("irrelevantNarrative"));
-      booleanQuery.add(new BoostQuery(irrelevantNarrativeQuery, 2f), BooleanClause.Occur.FILTER);
+      if(!queryComponents.get("irrelevantNarrative").isEmpty()){
+          Query irrelevantNarrativeQuery = indexParser.parse(queryComponents.get("irrelevantNarrative"));
+          booleanQuery.add(new BoostQuery(irrelevantNarrativeQuery, 2.0f), BooleanClause.Occur.FILTER);
+      }
 
       TopDocs results = indexSearcher.search(booleanQuery.build(), max_results);
       ScoreDoc[] hits = results.scoreDocs;
