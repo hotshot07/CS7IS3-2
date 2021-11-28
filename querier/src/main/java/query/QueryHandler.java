@@ -116,7 +116,6 @@ public class QueryHandler {
   //
   private String processNarrativeTag(String stringToProcess) {
 
-    // TODO: work on synonyms to append to query string
     StringBuilder additionalDataToAppend = new StringBuilder();
 
     String[] unprocessedString =

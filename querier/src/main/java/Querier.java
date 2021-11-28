@@ -23,23 +23,21 @@ public class Querier {
     createDirs();
     StopWordGenerator stopWordGenerator = StopWordGenerator.getInstance();
 
-    // creating a list of analysers to iterate through
+    // creating a list of analysers
     List<Analyzer> analysers = new ArrayList<>();
-    //    analysers.add(new SimpleAnalyzer());
-    //    analysers.add(new StandardAnalyzer(stopWordGenerator.getCharset()));
+    // analysers.add(new StandardAnalyzer(stopWordGenerator.getCharset()));
     analysers.add(new EnglishAnalyzer(stopWordGenerator.getCharset()));
-    //    analysers.add(new ClassicAnalyzer(stopWordGenerator.getCharset()));
-    //    analysers.add(new WhitespaceAnalyzer());
-
+    // analysers.add(new ClassicAnalyzer(stopWordGenerator.getCharset()));
+    // analysers.add(new StopAnalyzer(stopWordGenerator.getCharset()));
+    // analysers.add(new SimpleAnalyzer());
     //    analysers.add(
     //        new Analyzer() {
     //          @Override
     //          protected TokenStreamComponents createComponents(String s) {
-    //            WikipediaTokenizer src = new WikipediaTokenizer();
+    //            WhitespaceTokenizer src = new WhitespaceTokenizer();
     //            TokenStream result = new LowerCaseFilter(src);
     //            result = new StopFilter(result, stopWordGenerator.getCharset());
     //            result = new PorterStemFilter(result);
-    //            result = new LowerCaseFilter(result);
     //            return new TokenStreamComponents(src, result);
     //          }
     //        });
@@ -48,49 +46,29 @@ public class Querier {
     List<Similarity> similarities = new ArrayList<>();
     //    similarities.add(new ClassicSimilarity());
     similarities.add(new BM25Similarity(0.65F, 0.8F));
-    //    similarities.add(new LMDirichletSimilarity(1500));
     similarities.add(
         new MultiSimilarity(
-            new Similarity[] {new BM25Similarity(1F, 0.95F), new AxiomaticF2EXP()}));
+            new Similarity[] {new BM25Similarity(1.2F, 0.95F), new AxiomaticF2EXP()}));
+
     //    similarities.add(new AxiomaticF1EXP());
     //    similarities.add(new AxiomaticF1LOG());
     //    similarities.add(new AxiomaticF2EXP());
-    // similarities.add(new AxiomaticF2LOG());
+    //    similarities.add(new AxiomaticF2LOG());
 
-    // analyser was simple bm25 for parser
+    for (Analyzer analyser : analysers) {
 
-    Parser parser =
-        new Parser(new EnglishAnalyzer(stopWordGenerator.getCharset()), new BM25Similarity());
-    parser.parseAndIndex();
-    //    //
-    //
-    TimeUnit.SECONDS.sleep(1);
-    // Querying the index using the same analyser/similarity pair
-    QueryHandler queryHandler =
-        new QueryHandler(
-            new EnglishAnalyzer(stopWordGenerator.getCharset()),
-            new MultiSimilarity(
-                new Similarity[] {new BM25Similarity(1.2F, 0.95F), new AxiomaticF2EXP()}),
-            1000);
-    queryHandler.executeQueries();
+      Parser parser = new Parser(analyser);
+      parser.parseAndIndex();
+      TimeUnit.SECONDS.sleep(1);
 
-    //    for (Analyzer analyser : analysers) {
-    //      for (Similarity similarity : similarities) {
-    //        // creating index for the particular analyser and similarity
-    //        Parser parser = new Parser(analyser, similarity);
-    //        parser.parseAndIndex();
-    //
-    //        // waiting 1 second before querying
-    //        TimeUnit.SECONDS.sleep(1);
-    //        // Querying the index using the same analyser/similarity pair
-    //        QueryHandler queryHandler = new QueryHandler(analyser, similarity, 1000);
-    //        queryHandler.executeQueries();
-    //      }
-    //    }
+      for (Similarity similarity : similarities) {
+        QueryHandler queryHandler = new QueryHandler(analyser, similarity, 1000);
+        queryHandler.executeQueries();
+      }
+    }
   }
 
   private static void createDirs() {
-    // probably need a better create method lol
     boolean indexDirectory = new File(INDEX_DIR).mkdir();
     boolean resultsDirectory = new File(RESULTS_DIR).mkdir();
   }
