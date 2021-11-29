@@ -12,13 +12,14 @@ import org.jsoup.nodes.Node;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static constants.DirectoryConstants.DATA_DIR;
 import static utils.CommonUtils.replacePunctuation;
 
-public class LatimesDocumentParser {
+public class LatimesDocumentParser implements Callable<String> {
   private final String LATIMES_DIR_PATH = DATA_DIR + "/latimes";
   private final IndexWriter iwriter;
 
@@ -29,7 +30,7 @@ public class LatimesDocumentParser {
     this.iwriter = indexWriter;
   }
 
-  public void parseAndIndexDocs() throws IOException {
+  public String call() throws IOException {
     long start_time = System.currentTimeMillis();
     File directoryPath = new File(LATIMES_DIR_PATH);
     List<File> filesList =
@@ -58,6 +59,7 @@ public class LatimesDocumentParser {
     System.out.format(
         "Indexed %s documents in %s seconds\n",
         totalCount, TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - start_time));
+    return "Done parsing LA Times";
   }
 
   private Document createDocument(List<Node> nodes) {

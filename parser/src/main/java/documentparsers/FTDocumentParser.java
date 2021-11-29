@@ -14,14 +14,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static constants.DirectoryConstants.DATA_DIR;
-
 import static utils.CommonUtils.replacePunctuation;
 
-public class FTDocumentParser {
+public class FTDocumentParser implements Callable<String> {
 
   private static final String FT_PATH = "/ft";
   private final IndexWriter iwriter;
@@ -31,7 +31,7 @@ public class FTDocumentParser {
     this.iwriter = iwriter;
   }
 
-  public void parseAndIndexDocs() throws IOException {
+  public String call() throws IOException {
     Path rootdir = Paths.get(DATA_DIR + FT_PATH);
     System.out.println("Indexing Documents at Path = " + rootdir.getFileName());
     List<Path> directories = null;
@@ -49,6 +49,7 @@ public class FTDocumentParser {
         e.printStackTrace();
       }
     }
+    return "Done parsing FTDocuments";
   }
 
   // Does it do anything? dead code?

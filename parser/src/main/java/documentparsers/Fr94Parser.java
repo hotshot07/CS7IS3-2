@@ -12,14 +12,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-
 import static constants.DirectoryConstants.DATA_DIR;
-
 import static utils.CommonUtils.replacePunctuation;
 
-public class Fr94Parser {
+public class Fr94Parser implements Callable<String> {
   public static ArrayList<File> files = new ArrayList<File>();
   public static ArrayList<org.apache.lucene.document.Document> docDatas =
       new ArrayList<org.apache.lucene.document.Document>();
@@ -29,10 +28,9 @@ public class Fr94Parser {
 
   public Fr94Parser(IndexWriter indexWriter) {
     this.iwriter = indexWriter;
-
   }
 
-  public void parseAndIndexDocs() throws IOException {
+  public String call() throws IOException {
     long start_time = System.currentTimeMillis();
     this.findAllFiles(this.FR_DIR_PATH);
     for (File file : files) {
@@ -43,6 +41,7 @@ public class Fr94Parser {
     System.out.format(
         "Indexed %s documents in %s seconds\n",
         files.size(), TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - start_time));
+    return "Done parsing FR94 docs";
   }
 
   private void parseContent(File file) throws IOException {

@@ -18,10 +18,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import static constants.DirectoryConstants.DATA_DIR;
 
-public class FbisParser {
+public class FbisParser implements Callable<String> {
 
   private static BufferedReader br;
   private static final String[] IGNORE_FILES = {"readchg.txt", "readmefb.txt"};
@@ -31,40 +32,36 @@ public class FbisParser {
 
   public FbisParser(IndexWriter indexWriter) {
     this.indexWriter = indexWriter;
-
   }
 
-  public void parseAndIndexDocs() throws IOException {
-    docFBIS(this.DIR_PATH, this.indexWriter);
-  }
-
-  private void docFBIS(String fbisDirec, IndexWriter iwr) throws IOException {
-    Directory fbisDir = FSDirectory.open(Paths.get(fbisDirec));
+  public String call() throws IOException {
+    Directory fbisDir = FSDirectory.open(Paths.get(this.DIR_PATH));
 
     for (String file : fbisDir.listAll()) {
       if (!file.equals(IGNORE_FILES[0]) && !file.equals(IGNORE_FILES[1])) {
-        br = new BufferedReader(new FileReader(fbisDirec + "/" + file));
-        System.out.println(fbisDirec + "/" + file);
-        indexDoc(iwr);
+        br = new BufferedReader(new FileReader(this.DIR_PATH + "/" + file));
+        System.out.println(this.DIR_PATH + "/" + file);
+        indexDoc(this.indexWriter);
       }
     }
+    return "Done FBIs";
   }
 
   private void indexDoc(IndexWriter iwr) throws IOException {
-	  
-	  StringBuilder sbld = new StringBuilder();
-      String buffRead = br.readLine();
+
+    StringBuilder sbld = new StringBuilder();
+    String buffRead = br.readLine();
     try {
 
-        while (buffRead != null) {
-        	sbld.append(buffRead);
-        	sbld.append("\n");
-        	buffRead = br.readLine();
-        }
-      } finally {
-        br.close();
+      while (buffRead != null) {
+        sbld.append(buffRead);
+        sbld.append("\n");
+        buffRead = br.readLine();
       }
-    
+    } finally {
+      br.close();
+    }
+
     org.jsoup.nodes.Document document = Jsoup.parse(sbld.toString());
 
     List<Element> list = document.getElementsByTag("doc");
@@ -87,21 +84,20 @@ public class FbisParser {
     Elements ele = doc.getElementsByTag(tag.name());
     Elements duplicateElement = ele.clone();
 
-    
     for (FbisTags tagValue : FbisTags.values()) {
-        if (ele.toString().contains("<" + tagValue.name().toLowerCase() + ">")
-            && ele.toString().contains("</" + tagValue.name().toLowerCase() + ">")
-            && !tagValue.equals(tag)) {
-        	ele.select(tagValue.toString()).remove();
-        }
+      if (ele.toString().contains("<" + tagValue.name().toLowerCase() + ">")
+          && ele.toString().contains("</" + tagValue.name().toLowerCase() + ">")
+          && !tagValue.equals(tag)) {
+        ele.select(tagValue.toString()).remove();
       }
-    
+    }
+
     String text = duplicateElement.toString();
     if (text.contains("\n")) text = text.replaceAll("\n", "").trim();
     if (text.contains(("<" + tag.name() + ">").toLowerCase()))
-    	text = text.replaceAll("<" + tag.name().toLowerCase() + ">", "").trim();
+      text = text.replaceAll("<" + tag.name().toLowerCase() + ">", "").trim();
     if (text.contains(("</" + tag.name() + ">").toLowerCase()))
-    	text = text.replaceAll("</" + tag.name().toLowerCase() + ">", "").trim();
+      text = text.replaceAll("</" + tag.name().toLowerCase() + ">", "").trim();
 
     text = text.trim().replaceAll(" +", " ");
     return text;

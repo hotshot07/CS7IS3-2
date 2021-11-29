@@ -113,10 +113,7 @@ public class QueryHandler {
         .toString();
   }
 
-  //
   private String processNarrativeTag(String stringToProcess) {
-
-    StringBuilder additionalDataToAppend = new StringBuilder();
 
     String[] unprocessedString =
         stringToProcess.strip().toLowerCase(Locale.ROOT).split("\\p{Punct}");

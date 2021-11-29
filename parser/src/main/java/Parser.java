@@ -10,6 +10,12 @@ import org.apache.lucene.store.FSDirectory;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static constants.DirectoryConstants.INDEX_DIR;
 
@@ -20,7 +26,7 @@ public class Parser {
     this.analyzer = analyzer;
   }
 
-  public void parseAndIndex() throws IOException {
+  public void parseAndIndex() throws IOException, InterruptedException {
 
     IndexWriterConfig config = new IndexWriterConfig(analyzer);
     config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
@@ -30,16 +36,22 @@ public class Parser {
     IndexWriter iwriter = new IndexWriter(directory, config);
 
     LatimesDocumentParser latimesDocumentParser = new LatimesDocumentParser(iwriter);
-    latimesDocumentParser.parseAndIndexDocs();
-
-    FTDocumentParser parser = new FTDocumentParser(iwriter);
-    parser.parseAndIndexDocs();
-
+    FTDocumentParser ftDocumentParser = new FTDocumentParser(iwriter);
     Fr94Parser fr94Parser = new Fr94Parser(iwriter);
-    fr94Parser.parseAndIndexDocs();
-
     FbisParser fbisParser = new FbisParser(iwriter);
-    fbisParser.parseAndIndexDocs();
+
+    ExecutorService executorService = Executors.newFixedThreadPool(4);
+    List<Callable<String>> tasks = new ArrayList<>(4);
+
+    tasks.add(latimesDocumentParser);
+    tasks.add(fr94Parser);
+    tasks.add(ftDocumentParser);
+    tasks.add(fbisParser);
+
+    List<Future<String>> answers = executorService.invokeAll(tasks);
+
+    executorService.shutdown();
+    System.out.println(answers);
 
     iwriter.close();
     directory.close();
