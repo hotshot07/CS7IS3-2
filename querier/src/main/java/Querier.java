@@ -48,7 +48,7 @@ public class Querier {
     // similarities.add(new BM25Similarity(0.65F, 0.8F));
     similarities.add(
         new MultiSimilarity(
-            new Similarity[] {new BM25Similarity(1.2F, 0.95F), new AxiomaticF2EXP(0.2F)}));
+            new Similarity[] {new BM25Similarity(1.1F, 0.95F), new AxiomaticF2EXP(0.2F)}));
     //    similarities.add(new LMDirichletSimilarity());
     // similarities.add(new LMJelinekMercerSimilarity(0.7F));
     //    similarities.add(new AxiomaticF1EXP());
