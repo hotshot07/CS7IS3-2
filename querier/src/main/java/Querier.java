@@ -45,15 +45,15 @@ public class Querier {
     // creating a list of similarities
     List<Similarity> similarities = new ArrayList<>();
     //    similarities.add(new ClassicSimilarity());
-    //    similarities.add(new BM25Similarity(0.65F, 0.8F));
+    // similarities.add(new BM25Similarity(0.65F, 0.8F));
     similarities.add(
         new MultiSimilarity(
             new Similarity[] {new BM25Similarity(1.2F, 0.95F), new AxiomaticF2EXP(0.2F)}));
     //    similarities.add(new LMDirichletSimilarity());
-    //    similarities.add(new LMJelinekMercerSimilarity(0.7F));
+    // similarities.add(new LMJelinekMercerSimilarity(0.7F));
     //    similarities.add(new AxiomaticF1EXP());
     //    similarities.add(new AxiomaticF1LOG());
-    //    similarities.add(new AxiomaticF2EXP(0.2F));
+    similarities.add(new AxiomaticF2EXP(0.2F));
     //    similarities.add(new AxiomaticF2LOG());
     //    similarities.add(new AxiomaticF3EXP(0.5F, 1));
 
