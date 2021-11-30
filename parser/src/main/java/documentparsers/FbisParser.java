@@ -68,12 +68,12 @@ public class FbisParser implements Callable<String> {
     for (Element doc : list) {
 
       FbisTagsData fbisData = new FbisTagsData();
-      if (doc.getElementsByTag(FbisTags.DOCNO.name()) != null)
-        fbisData.setDocNum(removeTags(doc, FbisTags.DOCNO));
-      if (doc.getElementsByTag(FbisTags.TEXT.name()) != null)
-        fbisData.setText(removeTags(doc, FbisTags.TEXT));
-      if (doc.getElementsByTag(FbisTags.TI.name()) != null)
-        fbisData.setTi(removeTags(doc, FbisTags.TI));
+      doc.getElementsByTag(FbisTags.DOCNO.name());
+      fbisData.setDocNum(removeTags(doc, FbisTags.DOCNO));
+      doc.getElementsByTag(FbisTags.TEXT.name());
+      fbisData.setText(removeTags(doc, FbisTags.TEXT));
+      doc.getElementsByTag(FbisTags.TI.name());
+      fbisData.setTi(removeTags(doc, FbisTags.TI));
       fbisData.setAll(fbisData.getText() + " " + fbisData.getTi().trim());
       createFBISDocument(fbisData, iwr);
     }
@@ -103,7 +103,7 @@ public class FbisParser implements Callable<String> {
     return text;
   }
 
-  private Document createFBISDocument(FbisTagsData fbisData, IndexWriter iwr) {
+  private void createFBISDocument(FbisTagsData fbisData, IndexWriter iwr) {
     Document document = new Document();
     document.add(new StringField("docno", fbisData.getDocNum(), Field.Store.YES));
     document.add(new TextField("title", fbisData.getTi(), Field.Store.YES));
@@ -113,6 +113,5 @@ public class FbisParser implements Callable<String> {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    return document;
   }
 }

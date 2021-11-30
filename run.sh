@@ -44,11 +44,11 @@ sleep 1;
 
 #printf "Removing previously created index and Results\n"
 #
-rm -rf data/index
+#rm -rf data/index
 rm -rf Results
 
 printf "Executing JAR\n"
-java -Xmx2048m -jar querier/target/querier-1.0-SNAPSHOT-shaded.jar
+java -Xmx4096m -jar querier/target/querier-1.0-SNAPSHOT-shaded.jar
 
 printf "Running trec eval\n"
 
