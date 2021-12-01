@@ -48,8 +48,8 @@ public class QueryHandler {
 
     // TODO: figure out booster values
     HashMap<String, Float> booster = new HashMap<String, Float>();
-    booster.put("title", 0.50f);
-    booster.put("content", 1.1f);
+    booster.put("title", 0.07F);
+    booster.put("content", 1.1F);
 
     MultiFieldQueryParser indexParser =
         new MultiFieldQueryParser(new String[] {"title", "content"}, analyzer, booster);
@@ -114,9 +114,6 @@ public class QueryHandler {
   }
 
   private String processNarrativeTag(String stringToProcess) {
-
-    // TODO: work on synonyms to append to query string
-    StringBuilder additionalDataToAppend = new StringBuilder();
 
     String[] unprocessedString =
         stringToProcess.strip().toLowerCase(Locale.ROOT).split("\\p{Punct}");
