@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -34,13 +35,17 @@ public class QueryHandler {
   private final ArrayList<LinkedHashMap<String, String>> parsedQueries;
   private final LinkedHashMap<String, String> refinedQueries;
 
+  private static final String RELEVANT_PHRASES_REGEX = "a relevant document will focus|a relevant document identifies|a relevant document could|a relevant document may|a relevant document must|a relevant document will|a document will|to be relevant|relevant documents|a document must|relevant|will contain|will discuss|will provide|must cite";
+
+  private static final String IRRELEVANT_PHRASES_REGEX = "are also not relevant|are not relevant|are irrelevant|is not relevant|not|NOT";
+
   public QueryHandler() {
     QueryFileParser queryFileParser = new QueryFileParser(TOPIC_PATH);
     this.parsedQueries = queryFileParser.parseQueryFile();
 
     LinkedHashMap<String, String> refinedQueries = new LinkedHashMap<>();
     for (LinkedHashMap<String, String> query : parsedQueries) {
-      String queryString = prepareQueryString(query);
+      String queryString = refineQueryComponents(query);
       refinedQueries.put(query.get("queryID"),queryString);
     }
 
@@ -111,32 +116,42 @@ public class QueryHandler {
         filename);
   }
 
-  private String prepareQueryString(LinkedHashMap<String, String> query) {
+  private String refineQueryComponents(LinkedHashMap<String, String> query) {
+
     StringBuilder finalQueryString = new StringBuilder();
     String title = replacePunctuation(query.get("title"));
     String desc = replacePunctuation(query.get("description"));
-    String narrative = processNarrativeTag(query.get("narrative"));
+    String relevantNarrative = processNarrativeTag(query.get("narrative"))[0];
+
     return finalQueryString
-        .append(title)
-        .append(" ")
-        .append(desc)
-        .append(" ")
-        .append(narrative)
-        .toString();
+            .append(title)
+            .append(" ")
+            .append(desc)
+            .append(" ")
+            .append(relevantNarrative)
+            .toString();
   }
 
-  private String processNarrativeTag(String stringToProcess) {
+  private String[] processNarrativeTag(String narrativeString) {
+    StringBuilder relevantNarrative = new StringBuilder();
+    StringBuilder irrelevantNarrative = new StringBuilder();
+    String[] processedNarrative = new String[2];
 
-    String[] unprocessedString =
-        stringToProcess.strip().toLowerCase(Locale.ROOT).split("\\p{Punct}");
-    StringBuilder processedString = new StringBuilder();
+    BreakIterator breakIterator = BreakIterator.getSentenceInstance();
+    breakIterator.setText(narrativeString);
+    int index = 0;
+    while (breakIterator.next() != BreakIterator.DONE) {
+      String sentence = narrativeString.substring(index, breakIterator.current());
 
-    for (String str : unprocessedString) {
-      str = str.strip();
-      if (!((str.contains("not") && str.contains("relevant")) || str.contains("irrelevant"))) {
-        processedString.append(str.replaceAll("\n", " ")).append(" ");
+      if (!sentence.contains("not relevant") && !sentence.contains("irrelevant")) {
+        relevantNarrative.append(sentence.replaceAll(RELEVANT_PHRASES_REGEX,""));
+      } else {
+        irrelevantNarrative.append(sentence.replaceAll(IRRELEVANT_PHRASES_REGEX, ""));
       }
+      index = breakIterator.current();
     }
-    return replacePunctuation(processedString.toString());
+    processedNarrative[0] = relevantNarrative.toString();
+    processedNarrative[1] = irrelevantNarrative.toString();
+    return processedNarrative;
   }
 }
