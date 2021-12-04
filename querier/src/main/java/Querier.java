@@ -57,6 +57,7 @@ public class Querier {
     //    similarities.add(new AxiomaticF2LOG());
     //    similarities.add(new AxiomaticF3EXP(0.5F, 1));
 
+    QueryHandler queryHandler = new QueryHandler();
     for (Analyzer analyser : analysers) {
 
       Parser parser = new Parser(analyser);
@@ -64,7 +65,7 @@ public class Querier {
       TimeUnit.SECONDS.sleep(1);
 
       for (Similarity similarity : similarities) {
-        QueryHandler queryHandler = new QueryHandler(analyser, similarity, 1000);
+        queryHandler.configure(analyser, similarity, 1000);
         queryHandler.executeQueries();
       }
     }

@@ -28,11 +28,26 @@ import static constants.DirectoryConstants.*;
 import static utils.CommonUtils.replacePunctuation;
 
 public class QueryHandler {
-  private final Analyzer analyzer;
-  private final Similarity similarity;
-  private final int max_results;
+  private Analyzer analyzer;
+  private Similarity similarity;
+  private int max_results;
+  private final ArrayList<LinkedHashMap<String, String>> parsedQueries;
+  private final LinkedHashMap<String, String> refinedQueries;
 
-  public QueryHandler(Analyzer analyzer, Similarity similarity, int max_results) {
+  public QueryHandler() {
+    QueryFileParser queryFileParser = new QueryFileParser(TOPIC_PATH);
+    this.parsedQueries = queryFileParser.parseQueryFile();
+
+    LinkedHashMap<String, String> refinedQueries = new LinkedHashMap<>();
+    for (LinkedHashMap<String, String> query : parsedQueries) {
+      String queryString = prepareQueryString(query);
+      refinedQueries.put(query.get("queryID"),queryString);
+    }
+
+    this.refinedQueries = refinedQueries;
+  }
+
+  public void configure(Analyzer analyzer, Similarity similarity, int max_results){
     this.analyzer = analyzer;
     this.similarity = similarity;
     this.max_results = max_results;
@@ -63,17 +78,14 @@ public class QueryHandler {
 
     PrintWriter resultsWriter = new PrintWriter(filename, StandardCharsets.UTF_8);
 
-    QueryFileParser queryFileParser = new QueryFileParser(TOPIC_PATH);
-    ArrayList<LinkedHashMap<String, String>> parsedQueries = queryFileParser.parseQueryFile();
 
-    for (LinkedHashMap<String, String> query : parsedQueries) {
+    for (String queryId : refinedQueries.keySet()) {
 
-      String queryString = prepareQueryString(query);
+      String queryString = refinedQueries.get(queryId);
       Query finalQuery = indexParser.parse(QueryParser.escape(queryString));
 
       TopDocs results = indexSearcher.search(finalQuery, max_results);
       ScoreDoc[] hits = results.scoreDocs;
-      String queryId = query.get("queryID");
       // To write the results for each hit in the format expected by the trec_eval tool.
       for (int i = 0; i < hits.length; i++) {
         Document document = indexSearcher.doc(hits[i].doc);
