@@ -4,7 +4,6 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -30,27 +29,24 @@ import static constants.DirectoryConstants.*;
 import static utils.CommonUtils.replacePunctuation;
 
 public class QueryHandler {
-
-  private final Analyzer analyzer;
-  private final Similarity similarity;
-  private final int max_results;
-  private static final int NUM_RELEVENT_DOCS = 20;
-
+  private Analyzer analyzer;
+  private Similarity similarity;
+  private int max_results;
+  private final LinkedHashMap<String, String> refinedQueries;
 
   public QueryHandler() {
     QueryFileParser queryFileParser = new QueryFileParser(TOPIC_PATH);
-    this.parsedQueries = queryFileParser.parseQueryFile();
+    ArrayList<LinkedHashMap<String, String>> parsedQueries = queryFileParser.parseQueryFile();
 
     LinkedHashMap<String, String> refinedQueries = new LinkedHashMap<>();
     for (LinkedHashMap<String, String> query : parsedQueries) {
       String queryString = prepareQueryString(query);
-      refinedQueries.put(query.get("queryID"),queryString);
+      refinedQueries.put(query.get("queryID"), queryString);
     }
-
     this.refinedQueries = refinedQueries;
   }
 
-  public void configure(Analyzer analyzer, Similarity similarity, int max_results){
+  public void configure(Analyzer analyzer, Similarity similarity, int max_results) {
     this.analyzer = analyzer;
     this.similarity = similarity;
     this.max_results = max_results;
@@ -64,7 +60,6 @@ public class QueryHandler {
     IndexSearcher indexSearcher = new IndexSearcher(indexReader);
     indexSearcher.setSimilarity(similarity);
 
-    // TODO: figure out booster values
     HashMap<String, Float> booster = new HashMap<String, Float>();
     booster.put("title", 0.07F);
     booster.put("content", 1.1F);
@@ -81,23 +76,20 @@ public class QueryHandler {
 
     PrintWriter resultsWriter = new PrintWriter(filename, StandardCharsets.UTF_8);
 
-
-
-    for (LinkedHashMap<String, String> query : parsedQueries) {
-      String queryString = prepareQueryString(query);
-      //System.out.println("Initial Query "+queryString);
-
+    for (String queryId : refinedQueries.keySet()) {
+      String queryString = refinedQueries.get(queryId);
       Query finalQuery = indexParser.parse(QueryParser.escape(queryString));
+
       TopDocs initresults = indexSearcher.search(finalQuery, max_results);
       ScoreDoc[] hits = initresults.scoreDocs;
-      QueryExpansion expander = new QueryExpansion(analyzer, indexSearcher, similarity, indexReader);
+      QueryExpansion expander =
+          new QueryExpansion(analyzer, indexSearcher, similarity, indexReader);
+
       queryString = expander.expandQuery(queryString, hits);
       finalQuery = indexParser.parse(QueryParser.escape(queryString));
       TopDocs results = indexSearcher.search(finalQuery, max_results);
       hits = results.scoreDocs;
-      String queryId = query.get("queryID");
 
-      // To write the results for each hit in the format expected by the trec_eval tool.
       for (int i = 0; i < hits.length; i++) {
         Document document = indexSearcher.doc(hits[i].doc);
         resultsWriter.println(

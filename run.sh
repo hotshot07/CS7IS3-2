@@ -42,8 +42,7 @@ mvn package;
 #
 sleep 1;
 
-#printf "Removing previously created index and Results\n"
-#
+printf "Removing previously created index and Results\n"
 rm -rf data/index
 rm -rf Results
 

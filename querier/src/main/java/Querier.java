@@ -1,10 +1,7 @@
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.similarities.AxiomaticF2EXP;
-import org.apache.lucene.search.similarities.BM25Similarity;
-import org.apache.lucene.search.similarities.MultiSimilarity;
-import org.apache.lucene.search.similarities.Similarity;
+import org.apache.lucene.search.similarities.*;
 import query.QueryHandler;
 import utils.StopWordGenerator;
 
@@ -44,25 +41,26 @@ public class Querier {
 
     // creating a list of similarities
     List<Similarity> similarities = new ArrayList<>();
-    //    similarities.add(new ClassicSimilarity());
-    // similarities.add(new BM25Similarity(0.65F, 0.8F));
+    similarities.add(new ClassicSimilarity());
+    similarities.add(new BM25Similarity(0.65F, 0.8F));
     similarities.add(
         new MultiSimilarity(
             new Similarity[] {new BM25Similarity(1.1F, 0.95F), new AxiomaticF2EXP(0.2F)}));
-    //    similarities.add(new LMDirichletSimilarity());
-    // similarities.add(new LMJelinekMercerSimilarity(0.7F));
-    //    similarities.add(new AxiomaticF1EXP());
-    //    similarities.add(new AxiomaticF1LOG());
-    //similarities.add(new AxiomaticF2EXP(0.2F));
-    //    similarities.add(new AxiomaticF2LOG());
-    //    similarities.add(new AxiomaticF3EXP(0.5F, 1));
+    similarities.add(new LMDirichletSimilarity());
+    similarities.add(new LMJelinekMercerSimilarity(0.7F));
+    similarities.add(new AxiomaticF1EXP());
+    similarities.add(new AxiomaticF1LOG());
+    similarities.add(new AxiomaticF2EXP(0.2F));
+    similarities.add(new AxiomaticF2LOG());
+    similarities.add(new AxiomaticF3EXP(0.5F, 1));
 
     QueryHandler queryHandler = new QueryHandler();
+
     for (Analyzer analyser : analysers) {
 
-//      Parser parser = new Parser(analyser);
-//      parser.parseAndIndex();
-//      TimeUnit.SECONDS.sleep(1);
+      Parser parser = new Parser(analyser);
+      parser.parseAndIndex();
+      TimeUnit.SECONDS.sleep(1);
 
       for (Similarity similarity : similarities) {
         queryHandler.configure(analyser, similarity, 1000);
