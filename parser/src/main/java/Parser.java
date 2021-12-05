@@ -40,6 +40,7 @@ public class Parser {
     Fr94Parser fr94Parser = new Fr94Parser(iwriter);
     FbisParser fbisParser = new FbisParser(iwriter);
 
+    //Multithreading to reduce time to index
     ExecutorService executorService = Executors.newFixedThreadPool(4);
     List<Callable<String>> tasks = new ArrayList<>(4);
 
