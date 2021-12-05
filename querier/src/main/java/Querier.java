@@ -53,16 +53,16 @@ public class Querier {
     // similarities.add(new LMJelinekMercerSimilarity(0.7F));
     //    similarities.add(new AxiomaticF1EXP());
     //    similarities.add(new AxiomaticF1LOG());
-    similarities.add(new AxiomaticF2EXP(0.2F));
+    //similarities.add(new AxiomaticF2EXP(0.2F));
     //    similarities.add(new AxiomaticF2LOG());
     //    similarities.add(new AxiomaticF3EXP(0.5F, 1));
 
     QueryHandler queryHandler = new QueryHandler();
     for (Analyzer analyser : analysers) {
 
-      Parser parser = new Parser(analyser);
-      parser.parseAndIndex();
-      TimeUnit.SECONDS.sleep(1);
+//      Parser parser = new Parser(analyser);
+//      parser.parseAndIndex();
+//      TimeUnit.SECONDS.sleep(1);
 
       for (Similarity similarity : similarities) {
         queryHandler.configure(analyser, similarity, 1000);

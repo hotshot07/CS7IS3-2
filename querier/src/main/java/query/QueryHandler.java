@@ -4,6 +4,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -14,6 +15,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 import queryparser.QueryFileParser;
+import util.QueryExpansion;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -28,11 +30,12 @@ import static constants.DirectoryConstants.*;
 import static utils.CommonUtils.replacePunctuation;
 
 public class QueryHandler {
-  private Analyzer analyzer;
-  private Similarity similarity;
-  private int max_results;
-  private final ArrayList<LinkedHashMap<String, String>> parsedQueries;
-  private final LinkedHashMap<String, String> refinedQueries;
+
+  private final Analyzer analyzer;
+  private final Similarity similarity;
+  private final int max_results;
+  private static final int NUM_RELEVENT_DOCS = 20;
+
 
   public QueryHandler() {
     QueryFileParser queryFileParser = new QueryFileParser(TOPIC_PATH);
@@ -79,13 +82,21 @@ public class QueryHandler {
     PrintWriter resultsWriter = new PrintWriter(filename, StandardCharsets.UTF_8);
 
 
-    for (String queryId : refinedQueries.keySet()) {
 
-      String queryString = refinedQueries.get(queryId);
+    for (LinkedHashMap<String, String> query : parsedQueries) {
+      String queryString = prepareQueryString(query);
+      //System.out.println("Initial Query "+queryString);
+
       Query finalQuery = indexParser.parse(QueryParser.escape(queryString));
-
+      TopDocs initresults = indexSearcher.search(finalQuery, max_results);
+      ScoreDoc[] hits = initresults.scoreDocs;
+      QueryExpansion expander = new QueryExpansion(analyzer, indexSearcher, similarity, indexReader);
+      queryString = expander.expandQuery(queryString, hits);
+      finalQuery = indexParser.parse(QueryParser.escape(queryString));
       TopDocs results = indexSearcher.search(finalQuery, max_results);
-      ScoreDoc[] hits = results.scoreDocs;
+      hits = results.scoreDocs;
+      String queryId = query.get("queryID");
+
       // To write the results for each hit in the format expected by the trec_eval tool.
       for (int i = 0; i < hits.length; i++) {
         Document document = indexSearcher.doc(hits[i].doc);
