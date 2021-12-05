@@ -33,7 +33,7 @@ printf "
 "
 
 # wait for sec to let them appreciate the art work
-#sleep 1;
+sleep 1;
 #
 printf "Running mvn clean and package\n"
 #
